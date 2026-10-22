@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "智联投递助手",
+  "version": "1.1.0",
+  "description": "【仅供学习研究，请勿用于实际求职】智联招聘页面结构识别与流程编排的 Chrome 扩展示例：多形态页面识别、筛选链、跨标签页协调、投递台账。数据全本地，无云端。",
+  "minimum_chrome_version": "116",
+  "permissions": [
+    "storage",
+    "notifications"
+  ],
+  "host_permissions": [
+    "*://*.zhaopin.com/*"
+  ],
+  "optional_host_permissions": [
+    "https://*/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.zhaopin.com/*"
+      ],
+      "js": [
+        "content/common.js",
+        "content/list.js",
+        "content/detail.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "icons/128.png"
+      ],
+      "matches": [
+        "*://*.zhaopin.com/*"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>智联投递助手 · 界面预览</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #eef0f4; min-height: 100vh; }
+  body.dark { background: #101214; }
+  .stage { display: flex; gap: 34px; justify-content: center; align-items: flex-start; padding: 40px 20px; flex-wrap: wrap; }
+  .hint-bar { text-align: center; color: #6b7280; font-size: 12px; padding: 14px; }
+  .fake-panel { position: static !important; display: flex !important; opacity: 1 !important; transform: none !important; max-height: none !important; }
+  .fake-ball { position: static !important; }
+
+  body {
+    all: initial;
+    --acc: #1668dc;
+    --acc-weak: #eaf2ff;
+    --acc-text: #0f52ad;
+    --bg: #ffffff;
+    --bg-sub: #f6f7f9;
+    --bg-hover: #f1f3f6;
+    --bd: #e6e8ec;
+    --bd-strong: #d5d9df;
+    --tx: #1a1c1f;
+    --tx-2: #4a5057;
+    --tx-3: #868d97;
+    --warn-bg: #fff8e6;
+    --warn-bd: #ffe1a6;
+    --warn-tx: #8a5b00;
+    --danger: #d92d20;
+    --danger-bg: #fff1f0;
+    --danger-bd: #ffccc7;
+    --ok: #12805c;
+    --radius: 10px;
+    --shadow: 0 12px 40px rgba(16, 24, 40, .16), 0 2px 8px rgba(16, 24, 40, .06);
+  }
+  @media (prefers-color-scheme: dark) {
+    body {
+      --acc: #4c8dff;
+      --acc-weak: #1b2a44;
+      --acc-text: #9dc0ff;
+      --bg: #1b1d20;
+      --bg-sub: #23262a;
+      --bg-hover: #2a2e33;
+      --bd: #2e3238;
+      --bd-strong: #3c424a;
+      --tx: #e8eaed;
+      --tx-2: #b3b9c2;
+      --tx-3: #838a94;
+      --warn-bg: #2e2617;
+      --warn-bd: #4d3d1c;
+      --warn-tx: #e3c07a;
+      --danger: #ff6b5e;
+      --danger-bg: #36201e;
+      --danger-bd: #4d2a26;
+      --ok: #4dd4a0;
+      --shadow: 0 12px 40px rgba(0, 0, 0, .5), 0 2px 8px rgba(0, 0, 0, .3);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; }
+  * {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- 悬浮球 ---------- */
+  .ball {
+    position: fixed; right: 22px; bottom: 22px; width: 46px; height: 46px; border-radius: 15px;
+    background: linear-gradient(150deg, var(--acc), #0f52ad);
+    color: #fff; font-size: 17px; font-weight: 600; letter-spacing: .5px;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    z-index: 2147483000; box-shadow: 0 6px 20px rgba(22, 104, 220, .38);
+    user-select: none; transition: transform .18s cubic-bezier(.2,.8,.3,1), box-shadow .18s;
+  }
+  .ball:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 10px 26px rgba(22, 104, 220, .45); }
+  .ball:active { transform: scale(.97); }
+  .ball .dot {
+    position: absolute; right: -2px; top: -2px; width: 11px; height: 11px; border-radius: 50%;
+    background: #98a2b3; border: 2px solid #fff;
+  }
+  .ball .dot.on { background: #12b76a; box-shadow: 0 0 0 0 rgba(18,183,106,.6); animation: pulse 1.8s infinite; }
+  .ball .dot.pause { background: #f79009; }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(18,183,106,.5); }
+    70% { box-shadow: 0 0 0 7px rgba(18,183,106,0); }
+    100% { box-shadow: 0 0 0 0 rgba(18,183,106,0); }
+  }
+
+  /* ---------- 面板 ---------- */
+  .panel {
+    position: fixed; right: 22px; bottom: 78px; width: 424px; max-height: 78vh;
+    background: var(--bg); color: var(--tx); border: 1px solid var(--bd);
+    border-radius: 14px; box-shadow: var(--shadow); z-index: 2147483001;
+    display: none; flex-direction: column; overflow: hidden; font-size: 12.5px; line-height: 1.55;
+    opacity: 0; transform: translateY(8px) scale(.985); transition: opacity .16s, transform .16s;
+  }
+  .panel.open { display: flex; opacity: 1; transform: none; }
+
+  .head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 14px 9px; border-bottom: 1px solid var(--bd);
+  }
+  .head b { font-size: 13px; font-weight: 600; letter-spacing: .2px; }
+  .head .sub { font-size: 10.5px; color: var(--tx-3); margin-left: 7px; font-weight: 400; }
+  .head .x {
+    cursor: pointer; color: var(--tx-3); width: 22px; height: 22px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center; font-size: 12px; transition: .15s;
+  }
+  .head .x:hover { background: var(--bg-hover); color: var(--tx); }
+
+  /* ---------- 标签 ---------- */
+  .tabs { display: flex; gap: 2px; padding: 8px 10px 0; }
+  .tabs div {
+    flex: 1; text-align: center; padding: 6px 0 7px; cursor: pointer; border-radius: 7px 7px 0 0;
+    color: var(--tx-3); font-size: 11.5px; position: relative; transition: .15s; white-space: nowrap;
+  }
+  .tabs div:hover { color: var(--tx-2); background: var(--bg-sub); }
+  .tabs div.active { color: var(--acc); font-weight: 600; background: var(--acc-weak); }
+  .tabs div.active::after {
+    content: ""; position: absolute; left: 12%; right: 12%; bottom: 0; height: 2px;
+    background: var(--acc); border-radius: 2px 2px 0 0;
+  }
+
+  /* ---------- 内容区 ---------- */
+  .body { padding: 12px 14px 16px; overflow-y: auto; flex: 1; overscroll-behavior: contain; }
+  .body::-webkit-scrollbar { width: 8px; }
+  .body::-webkit-scrollbar-thumb { background: var(--bd-strong); border-radius: 8px; border: 2px solid var(--bg); }
+  .body::-webkit-scrollbar-track { background: transparent; }
+  .sec { display: none; animation: fade .18s ease; }
+  .sec.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+
+  h4 {
+    margin: 16px 0 8px; font-size: 11px; font-weight: 600; color: var(--tx-3);
+    letter-spacing: .6px; text-transform: uppercase;
+  }
+  h4:first-child { margin-top: 0; }
+
+  /* ---------- 表单行 ---------- */
+  .row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 6px 0; border-bottom: 1px dashed var(--bd);
+  }
+  .row:last-child { border-bottom: 0; }
+  .row > label { color: var(--tx-2); flex: 1; min-width: 0; }
+  .row input[type=text], .row input[type=password], .row input[type=number], .row select {
+    width: 132px; height: 27px; padding: 0 8px; border: 1px solid var(--bd-strong); border-radius: 6px;
+    font-size: 12px; color: var(--tx); background: var(--bg); transition: .15s; flex: none;
+  }
+  .row input:focus, .row select:focus, .row textarea:focus {
+    outline: none; border-color: var(--acc); box-shadow: 0 0 0 3px var(--acc-weak);
+  }
+  .row input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--acc); cursor: pointer; flex: none; }
+  .row .hint { display: block; font-size: 10.5px; color: var(--tx-3); line-height: 1.5; margin-top: 2px; }
+  .row:has(textarea) { flex-direction: column; align-items: stretch; gap: 4px; }
+  .row textarea {
+    width: 100%; min-height: 54px; padding: 7px 8px; border: 1px solid var(--bd-strong);
+    border-radius: 6px; font-size: 12px; color: var(--tx); background: var(--bg); resize: vertical; line-height: 1.5;
+  }
+
+  .hint { color: var(--tx-3); font-size: 10.5px; line-height: 1.55; margin: 3px 0 8px; }
+
+  /* ---------- 按钮 ---------- */
+  .btns { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+  .btns:last-child { margin-bottom: 0; }
+  button {
+    height: 28px; padding: 0 12px; border-radius: 7px; border: 1px solid var(--acc);
+    background: var(--acc); color: #fff; font-size: 12px; font-weight: 500; cursor: pointer;
+    font-family: inherit; transition: .15s; white-space: nowrap;
+  }
+  button:hover { filter: brightness(1.06); }
+  button:active { transform: translateY(.5px); }
+  button.ghost { background: transparent; color: var(--acc); border-color: var(--bd-strong); }
+  button.ghost:hover { background: var(--acc-weak); border-color: var(--acc); }
+  button.warn { background: transparent; color: var(--danger); border-color: var(--danger-bd); }
+  button.warn:hover { background: var(--danger-bg); border-color: var(--danger); }
+  button.sm { height: 24px; padding: 0 8px; font-size: 11px; border-radius: 5px; }
+  button:disabled { opacity: .4; cursor: not-allowed; filter: none; transform: none; }
+
+  /* ---------- 统计卡 ---------- */
+  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin: 10px 0; }
+  .card { background: var(--bg-sub); border-radius: 9px; padding: 9px 4px; text-align: center; }
+  .card b {
+    display: block; font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums;
+    letter-spacing: -.3px; line-height: 1.2;
+  }
+  .card span { color: var(--tx-3); font-size: 10px; }
+
+  /* ---------- 状态条 ---------- */
+  .status {
+    background: var(--bg-sub); border-radius: 8px; padding: 8px 10px; color: var(--tx-2);
+    font-size: 11.5px; line-height: 1.6; word-break: break-word; border-left: 2px solid var(--acc);
+  }
+  .status b { color: var(--tx); font-weight: 600; }
+
+  /* ---------- 提示 ---------- */
+  .tip {
+    background: var(--warn-bg); border: 1px solid var(--warn-bd); color: var(--warn-tx);
+    border-radius: 8px; padding: 8px 10px; font-size: 11px; line-height: 1.6; margin: 8px 0;
+  }
+  .tip.danger { background: var(--danger-bg); border-color: var(--danger-bd); color: var(--danger); }
+
+  /* ---------- 表格 ---------- */
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11.5px; }
+  thead th {
+    position: sticky; top: 0; z-index: 1; background: var(--bg);
+    text-align: left; padding: 5px 6px; color: var(--tx-3); font-weight: 500; font-size: 10.5px;
+    border-bottom: 1px solid var(--bd); white-space: nowrap;
+  }
+  tbody td { padding: 5px 6px; border-bottom: 1px dashed var(--bd); color: var(--tx-2); }
+  tbody tr:hover td { background: var(--bg-hover); }
+  tbody td:first-child { color: var(--tx-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* ---------- 日志 ---------- */
+  .loglist { font-size: 11px; line-height: 1.65; }
+  .logitem { display: grid; grid-template-columns: 54px 1fr; gap: 6px; padding: 4px 0; border-bottom: 1px dashed var(--bd); }
+  .logitem .lv {
+    font-size: 9.5px; text-transform: uppercase; letter-spacing: .4px; color: var(--tx-3);
+    padding-top: 2px;
+  }
+  .logitem .lv.ok { color: var(--ok); }
+  .logitem .lv.error { color: var(--danger); }
+  .logitem .lv.warn { color: var(--warn-tx); }
+  .logitem .lv.skip { color: var(--tx-3); }
+
+  /* ---------- 候选清单 ---------- */
+  #confirm-list .row { align-items: center; }
+  #confirm-list .row > label { font-size: 11.5px; }
+  #confirm-list .row .hint { margin: 1px 0 0; }
+
+</style>
+</head>
+<body>
+<div class="hint-bar">智联投递助手 1.1 · 界面预览（左：真实投递模式 / 右：暗色主题）。实际使用时是右下角悬浮球 + 浮层。</div>
+<div class="stage">
+
+  <div class="panel open fake-panel" style="width:424px">
+    <div class="head"><b>智联投递助手</b><span class="sub">识别 19</span><span class="x">✕</span></div>
+    <div class="tabs">
+      <div class="active">运行</div><div>筛选</div><div>台账</div><div>统计</div><div>日志</div><div>配置</div>
+    </div>
+    <div class="body">
+      <div class="status"><b>当前页：职位列表页（按钮在详情区）</b> · 识别 19 个岗位</div>
+      <div class="tip danger">当前为<b>真实投递模式</b>：点「开始」会真的投递简历。</div>
+      <div class="btns">
+        <button style="flex:1">开始投递</button>
+        <button class="warn" style="flex:1">停止</button>
+      </div>
+      <div class="btns" style="margin-top:2px">
+        <button class="ghost sm">仅扫描</button>
+        <button class="ghost sm">试投一个</button>
+        <button class="ghost sm">投递当前岗位</button>
+        <button class="ghost sm">框选卡片</button>
+        <button class="ghost sm">复核结果</button>
+        <button class="ghost sm">开并行搜索页</button>
+        <button class="warn sm">全部停止</button>
+      </div>
+      <div class="cards">
+        <div class="card"><b>78</b><span>扫描</span></div>
+        <div class="card"><b>31</b><span>通过</span></div>
+        <div class="card"><b>18</b><span>投递</span></div>
+        <div class="card"><b>47</b><span>跳过</span></div>
+      </div>
+      <div class="status">全局排队 23 秒后继续…</div>
+      <div id="cb" style="display:block;margin-top:10px">
+        <div class="btns" style="margin:0 0 6px">
+          <button class="ghost sm">全部投</button>
+          <button class="ghost sm">清空</button>
+          <span class="hint" style="margin:0">共 3 个候选，点「投」逐个投递</span>
+        </div>
+        <div class="row"><label>Java 后端开发工程师<span class="hint">广西云启网络科技有限公司 · 15-25K</span></label>
+          <button class="ghost sm">投</button><button class="warn sm">×</button></div>
+        <div class="row"><label>后端开发（微服务方向）<span class="hint">南宁数擎科技有限公司 · 12-20K</span></label>
+          <button class="ghost sm">投</button><button class="warn sm">×</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel open fake-panel" id="dark" style="width:424px">
+    <div class="head"><b>智联投递助手</b><span class="sub">识别 19</span><span class="x">✕</span></div>
+    <div class="tabs">
+      <div>运行</div><div>筛选</div><div class="active">台账</div><div>统计</div><div>日志</div><div>配置</div>
+    </div>
+    <div class="body">
+      <div class="cards">
+        <div class="card"><b>36</b><span>已投递</span></div>
+        <div class="card"><b>7</b><span>有回复</span></div>
+        <div class="card"><b>19%</b><span>回复率</span></div>
+        <div class="card"><b>4</b><span>待跟进</span></div>
+      </div>
+      <div class="tip">已超过 3 天没回复，建议跟进：<br>· Java 后端开发 @ 云启网络<br>· 后端工程师 @ 数擎科技</div>
+      <div class="btns">
+        <button class="ghost sm">导出台账 CSV</button>
+        <button class="ghost sm">选择简历文件</button>
+        <button class="warn sm">清空台账</button>
+      </div>
+      <div class="hint">已设置附件简历：resume-example.pdf（742 KB），投递时会自动尝试附加</div>
+      <h4>按关键词的回复率</h4>
+      <table><thead><tr><th>关键词</th><th>投</th><th>回</th><th>回复率</th></tr></thead>
+        <tbody><tr><td>Java</td><td>18</td><td>5</td><td>28%</td></tr>
+        <tr><td>后端开发</td><td>12</td><td>2</td><td>17%</td></tr>
+        <tr><td>软件开发</td><td>6</td><td>0</td><td>0%</td></tr></tbody></table>
+      <h4>投递记录（最近 80 条）</h4>
+      <table><thead><tr><th>日期</th><th>岗位</th><th>公司</th><th>薪资</th><th>结果</th><th>回复</th><th>跟进</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>10/22</td><td>Java 后端开发</td><td>云启网络</td><td>15-25K</td><td>成功</td>
+            <td><button class="ghost sm">✓ 已回</button></td><td><button class="ghost sm">已跟进</button></td><td><button class="warn sm">删</button></td></tr>
+          <tr><td>10/22</td><td>后端工程师</td><td>数擎科技</td><td>12-20K</td><td>成功</td>
+            <td><button class="ghost sm">标记回复</button></td><td><button class="ghost sm">跟进</button></td><td><button class="warn sm">删</button></td></tr>
+          <tr><td>10/22</td><td>软件开发工程师</td><td>某信息公司</td><td>10-16K</td><td>失败</td>
+            <td><button class="ghost sm">标记回复</button></td><td><button class="ghost sm">跟进</button></td><td><button class="warn sm">删</button></td></tr>
+        </tbody></table>
+    </div>
+  </div>
+
+</div>
+<script>
+  // 右侧面板走暗色变量
+  const d = document.getElementById('dark');
+  const st = document.createElement('style');
+  st.textContent = `#dark { --bg:#1b1d20; --bg-sub:#23262a; --bg-hover:#2a2e33; --bd:#2e3238; --bd-strong:#3c424a;
+    --tx:#e8eaed; --tx-2:#b3b9c2; --tx-3:#838a94; --acc:#4c8dff; --acc-weak:#1b2a44;
+    --warn-bg:#2e2617; --warn-bd:#4d3d1c; --warn-tx:#e3c07a; --danger:#ff6b5e; --danger-bg:#36201e; --danger-bd:#4d2a26; }`;
+  document.head.appendChild(st);
+</script>
+</body>
+</html>
